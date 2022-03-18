@@ -1,0 +1,2 @@
+# Py-PROLIFIC-TIME
+Presently a time management console app that can add, remove, modify and list a wide variety of events such as stopwatch, reminder, tasks and todos. It can store data in a local database and continue with previously saved data by the user. The app can set to run in the background and make things done by reminding the user according to their need in order to make their time more prolific.
