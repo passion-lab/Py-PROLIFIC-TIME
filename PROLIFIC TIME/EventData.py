@@ -2,36 +2,31 @@
 # from datetime import datetime, timedelta
 # from pickle import load, dump
 from main import *
+
+
 # from NotificationHandler import *
 # from Engine import *
 
 
 # parent functions
-def set_data(data: int, title: str, description: str = "A brief description",
-             date: datetime.date = None,
-             time: datetime.time = None,
-             from_time: datetime.time = None,
-             to_time: datetime.time = None,
+def set_data(data: int,
+             date: datetime.date,
+             time: datetime.time,
+             title: str,
+             description: str = "A brief description",
+             from_datetime: datetime = None,
+             to_datetime: datetime = None,
              remind: list[timedelta] = None,
              repeat: bool = False,
              frequency: str = None,
              from_data: datetime.date = None,
              to_data: datetime.date = None):
-
-    if date is None:
-        # [i] default date = Today
-        date = datetime.today().date()
-
-    if time is None:
-        # [i] default time = Next hour
-        time = (datetime.now() + timedelta(hours=1)).time()
-
     if remind is None:
         # [i] default reminder = On time
         remind = [time]
     else:
         # [i] reminders to be added on user request from remind argument
-        remind = [(datetime.strptime(time.strftime("%H:%M:%S"), "%H:%M:%S") - item).time() for item in remind]
+        remind = [(datetime.strptime(time.strftime("%H:%M:%S"), "%H:%M:%S") - option).time() for option in remind]
         remind.insert(0, time)
 
     data = data_type_(data)
@@ -47,8 +42,8 @@ def set_data(data: int, title: str, description: str = "A brief description",
         },
         # [i] Optional
         "period": {
-            "start_time": from_time,
-            "end_time": to_time
+            "start_datetime": from_datetime,
+            "end_datetime": to_datetime
         } if data[1] == 'task' else None,
         "reminder": remind,
         "repeat": repeat,
@@ -119,7 +114,23 @@ def del_data(data: int, index: int, _prompt: bool = True):
 
 
 def mod_data(data: int, index: int):
-    pass
+    data = data_type_(data)
+    for key in data[0]['data'][index - 1]:
+        val = data[0]['data'][index - 1][key]
+        if type(val) == dict:
+            for sub_key in val:
+                print("  {:>12} = {}".format(sub_key.title(), val[sub_key]))
+        elif type(val) == list:
+            for index, sub_val in enumerate(val):
+                print("  {:>12} = {}".format(key.title() if index == 0 else "", sub_val))
+        elif type(val) == bool:
+            val = "Yes" if val else "No"
+            print("  {:>12} = {}".format(key.title(), val))
+        elif val is None:
+            val = "Yes" if val else "No"
+            print("  {:>12} = {}".format(key.title(), val))
+        else:
+            print("  {:>12} = {}".format(key.title(), val))
 
 
 # child functions
@@ -146,33 +157,6 @@ def data_update_(method: str = 'PUSH'):
             data = data_type_(index + 1)
             with open("Database/" + data[2], "rb") as f:
                 globals()[option] = load(f)
-
-
-# independent program functions
-def input_validation__(message: str, valid: list = None, _any: bool = False):
-    """
-
-    :param message: Message/Question to ask the user to collect their input
-    :param valid: A list of possible options (in raw format) to verify user input.
-    :param _any: To assure that the user can enter anything or not leave blank. valid parameter will become invalid here.
-    :return: Returns user input as raw format
-    """
-    selection = input(message).strip()
-    # [i] Convert user input into integer if it was digit else as it was
-    selection = int(selection) if selection.isdigit() else selection
-
-    if _any:
-        if selection:
-            return selection
-        else:
-            print("You've to enter something before proceeding. Please try again.")
-            input_validation__(message, _any=True)
-    else:
-        if selection in valid:
-            return selection
-        else:
-            print("Invalid input. Please try again.")
-            input_validation__(message, valid)
 
 
 if __name__ == '__main__':

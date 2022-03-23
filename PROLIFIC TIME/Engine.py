@@ -15,7 +15,7 @@ data_update_(method='PULL')
 # viz., countdown, reminder, task and todo
 active_event = {index: [] for index, _ in enumerate(options)}
 
-# [i] Creating an empty dict and updating with the running entries
+# [i] Creating an empty dict and updating with the running threads of entries
 active_entry = {index: [] for index, _ in enumerate(options)}
 
 
@@ -97,7 +97,7 @@ def core_engine(entry, index):
         else:
             if entry['when']['date'] == datetime.now().date():
                 if entry['when']['time'] <= datetime.now().time():
-                    notify_desktop(title=entry['title'], message=entry['description'])
+                    notify_desktop(title=entry['title'], message=entry['description'], file=data[1])
                     active_entry[index].remove(entry)
                     print(f"Stopping thread {entry['title']}...")
                     del_data(1, data[0]['data'].index(entry), _prompt=False)
@@ -106,13 +106,14 @@ def core_engine(entry, index):
         sleep(1)
 
 
-def notify_desktop(title: str = "Title", message: str = "Here the brief message goes."):
+def notify_desktop(title: str = "Title", message: str = "Here the brief message goes.", file: str = "Notification"):
     notification.notify(
         title=title.upper(),
         message=message,
+        app_name="PROLIFIC TIME",
+        app_icon="./Icons/" + file + ".ico",
         timeout=5,
-        ticker="Hi",
-        toast=True
+        ticker=file,
     )
 
 
