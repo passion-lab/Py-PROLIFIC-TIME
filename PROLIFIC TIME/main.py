@@ -25,44 +25,30 @@ countdowns, reminders, tasks, todos = [{
 }] * 4
 
 
-# reminders = {
-#     "count": 0,
-#     # imposed by the program on user demand...
-#     "data": []
-# }
-# tasks = {
-#     "count": 0,
-#     # imposed by the program on user demand...
-#     "data": []
-# }
-# todos = {
-#     "count": 0,
-#     # imposed by the program on user demand...
-#     "data": []
-# }
-
-# [i] Additional reminders
-
-
-def input_datetime__(what: str, event_date: datetime.date):
+# independent program functions
+def input_datetime__(parameter: str, prompt: str, reference_date: datetime.date = None):
     """
 
-    :param what: What to receive? 'DATE' or 'TIME
-    :param event_date: A date is required to troubleshoot the time
+    :param parameter: What to receive? 'DATE' or 'TIME
+    :param prompt: Prompt message string for the user
+    :param reference_date: A date is required to troubleshoot the time
     :return: Date or Time in datetime format
     """
 
-    if what == 'DATE':
+    if parameter == 'DATE':
         while 1:
             try:
-                event_date = input("Event date [default today; dd/mm/yyyy] = ")
-                if event_date:
-                    event_date = datetime.date(datetime.strptime(event_date, "%d/%m/%Y"))
-                    # [i] Taking date only if it is today or a later day
-                    if event_date >= datetime.now().date():
-                        return event_date
+                _date = input(prompt)
+                if _date:
+                    if _date == "...":
+                        return None
                     else:
-                        print("Sorry, you've to go for the same day or a later day. Try again.")
+                        _date = datetime.date(datetime.strptime(_date, "%d/%m/%Y"))
+                        # [i] Taking date only if it is today or a later day
+                        if _date >= datetime.now().date():
+                            return _date
+                        else:
+                            print("Sorry, you've to go for the same day or a later day. Try again.")
                 else:
                     # [i] default date = Today
                     return datetime.today().date()
@@ -70,23 +56,31 @@ def input_datetime__(what: str, event_date: datetime.date):
                 print("Wrong input! Enter date correctly again.")
                 continue
 
-    if what == 'TIME':
+    elif parameter == 'TIME':
         while 1:
             try:
-                event_time = input("Event time [default next hour; hh:mm:ss] = ")
-                if event_time:
-                    event_time = datetime.time(datetime.strptime(event_time, "%H:%M:%S"))
-                    # [i] Taking time only if it is after the current time
-                    if event_date == datetime.now().date() and event_time <= datetime.now().time():
-                        print("Sorry, you've to go for the a later time. Try again.")
+                _time = input(prompt)
+                if _time:
+                    # _time = datetime.time(datetime.strptime(_time, "%H:%M:%S"))
+                    _time = datetime.strptime(_time, "%H:%M:%S").time()
+                    # _time = datetime.time(datetime.strptime(_time, "%H:%M:%S"))
+                    if reference_date is not None:
+                        # [i] Taking time only if it is after the current or a reference time
+                        if reference_date == datetime.now().date() and _time <= datetime.now().time():
+                            print("Sorry, you've to go for the a later time. Try again.")
+                        else:
+                            return _time
                     else:
-                        return event_time
+                        return _time
                 else:
                     # [i] default time = Next hour
                     return (datetime.now() + timedelta(hours=1)).time()
             except ValueError:
                 print("Wrong input! Enter time correctly again.")
                 continue
+
+    else:
+        raise ValueError("input_datetime__() function supports only 'DATE' or 'TIME' as the primary argument.")
 
 
 def input_reminder__():
@@ -146,10 +140,17 @@ def input_reminder__():
 
 
 def input_recurrence__():
-    selection = input_validation__("")
+    print(f"Event execution modes:\n  [1] One-time only\n  [2] Recurrently")
+    __0 = input_validation__(f"[Default one-time] How frequently would we run your {data_type_(user_event)[1]}? ",
+                             [1, 2], default=1)
+    if __0 == 2:
+        print("Event recursion frequency:\n  [1] Daily\n  [2] Weekly\n  [3] Monthly\n  [4] Yearly")
+        __1 = input_validation__("We repeat the event = ", [1, 2, 3, 4])
+
+    else:
+        return False
 
 
-# independent program functions
 def input_validation__(message: str, valid: list = None, default=None, _any: bool = False):
     """
 
@@ -179,6 +180,10 @@ def input_validation__(message: str, valid: list = None, default=None, _any: boo
                 print("Invalid input. Please try again.")
 
 
+def input_user():
+    pass
+
+
 if __name__ == '__main__':
 
     if path.isdir("Database"):
@@ -187,19 +192,6 @@ if __name__ == '__main__':
     else:
         mkdir("Database")
         data_update_(method='PUSH')
-
-    """
-    dt = input("Date (dd/mm/yyyy): ")
-    dt = datetime.date(datetime.strptime(dt, "%d/%m/%Y"))
-    tm = input("Time (hh:mm:ss): ")
-    tm = datetime.time(datetime.strptime(tm, "%H:%M:%S"))
-
-    set_data(1, "First", "My first countdown")
-    set_data(1, "Second", date=dt, repeat=True, remind=[timedelta(minutes=30), timedelta(hours=1)])
-    set_data(1, "Third", "A brief note", repeat=False, date=dt, time=tm)
-    set_data(3, "First", time=tm)
-    set_data(2, "First")
-    """
 
     print("Welcome to the Task Management Software")
     value = get_data(0, _blank=True)
@@ -224,10 +216,10 @@ if __name__ == '__main__':
                                             ["<"] + [sl + 1 for sl, _ in enumerate(options)])
             if user_event == "<":
                 continue
-            user_event_title = input_validation__(f" [REQUIRED] Enter a title = ", _any=True)
-            user_event_de_sription = input(f"[Optional] Add a brief note for your {data_type_(user_event)[1]} = ")
-            user_event_date = input_datetime__('DATE', None)
-            user_event_time = input_datetime__('TIME', user_event_date)
+            user_event_title = input_validation__(f"[REQUIRED] Enter a title = ", _any=True)
+            user_event_description = input(f"[Optional] Add a brief note for your {data_type_(user_event)[1]} = ")
+            user_event_date = input_datetime__('DATE', "Event date [default today; dd/mm/yyyy] = ", None)
+            user_event_time = input_datetime__('TIME', "Event time [default next hour; hh:mm:ss] = ", user_event_date)
             if data_type_(user_event)[1] == "task":
                 user_event_period = input_validation__(f"[Default Yes; 'N' No] Add a span for your task = "
                                                        f"'{user_event_title}'? ", ["N", "n", "Y", "y"], default="Y")
@@ -250,9 +242,28 @@ if __name__ == '__main__':
                     if user_event_datetime == user_event_until:
                         user_event_until = None
             user_event_reminder = input_reminder__()
+            print(f"Event execution modes:\n  [1] One-time only\n  [2] Recurrently")
+            user_event_repeat = input_validation__(f"[Default one-time] How frequently would we run your "
+                                                   f"{data_type_(user_event)[1]}? ", [1, 2], default=1)
+            if user_event_repeat == 2:
+                user_event_repeat = True
+                print("Event recursion frequency:\n  [1] Daily\n  [2] Weekly\n  [3] Monthly\n  [4] Yearly")
+                user_event_repeat_frequency = input_validation__("We repeat the event = ", [1, 2, 3, 4])
+                if user_event_repeat_frequency == 1:
+                    user_event_repeat_frequency = "Daily"
+                elif user_event_repeat_frequency == 2:
+                    user_event_repeat_frequency = "Weekly"
+                elif user_event_repeat_frequency == 3:
+                    user_event_repeat_frequency = "Monthly"
+                elif user_event_repeat_frequency == 4:
+                    user_event_repeat_frequency = "Yearly"
+                user_event_start_date = input_datetime__('DATE', "Event start date [default today; dd/mm/yyyy] = ")
+                user_event_end_date = input_datetime__('DATE', "Event end date ['...' Infinite; dd/mm/yyyy] = ")
+            else:
+                user_event_repeat = False
 
             # [i] Adding event to the database
-            set_data(user_event, title=user_event_title, de_sription=user_event_de_sription, date=user_event_date,
+            set_data(user_event, title=user_event_title, description=user_event_description, date=user_event_date,
                      time=user_event_time, remind=user_event_reminder)
 
             # [i] Displaying events after adding
@@ -275,8 +286,8 @@ if __name__ == '__main__':
                 continue
             number = get_data(user_event)
             if number:
-                user_entry = input_validation__("Choose an event to delete: ", [i for i in range(1, number + 1)])
-                # print(user_entry, type(user_entry))
+                user_entry = input_validation__("Choose an event to delete: ['*' All] ",
+                                                ["*"] + [i for i in range(1, number + 1)])
                 del_data(user_event, user_entry)
 
                 # [i] Show event list after deletion

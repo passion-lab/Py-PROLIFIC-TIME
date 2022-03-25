@@ -19,8 +19,9 @@ def set_data(data: int,
              remind: list[timedelta] = None,
              repeat: bool = False,
              frequency: str = None,
-             from_data: datetime.date = None,
-             to_data: datetime.date = None):
+             from_date: datetime.date = None,
+             next_date: datetime.date = None,
+             to_date: datetime.date = None):
     if remind is None:
         # [i] default reminder = On time
         remind = [time]
@@ -40,7 +41,6 @@ def set_data(data: int,
             "date": date if not repeat else None,
             "time": time
         },
-        # [i] Optional
         "period": {
             "start_datetime": from_datetime,
             "end_datetime": to_datetime
@@ -48,10 +48,10 @@ def set_data(data: int,
         "reminder": remind,
         "repeat": repeat,
         "loop": {
-            "how_frequent": frequency,  # [+] to be fun
-            # [i] Optional
-            "start_date": from_data,
-            "end_date": to_data
+            "how_frequent": frequency,
+            "start_date": from_date,
+            "next_date": next_date,
+            "end_date": to_date
         } if repeat else None
     })
 
@@ -88,7 +88,7 @@ def get_data(data: int, index: int = None, _blank: bool = False):
                 return data[0]['count']
 
 
-def del_data(data: int, index: int, _prompt: bool = True):
+def del_data(data: int, index, _prompt: bool = True):
     data = data_type_(data)
 
     if _prompt:
@@ -96,8 +96,12 @@ def del_data(data: int, index: int, _prompt: bool = True):
         # permission = input().strip()
         permission = input_validation__("Press 'Y' to delete or 'Enter' to go back: ", ['Y', ''])
         if permission == "Y":
-            data[0]['data'].pop(index - 1)
-            data[0]['count'] -= 1
+            if type(index) == int:
+                data[0]['data'].pop(index - 1)
+                data[0]['count'] -= 1
+            else:
+                data[0]['data'].clear()
+                data[0]['count'] = 0
 
             # [i] updates the local database shortly
             with open("Database/" + data[2], "wb") as f:
