@@ -74,7 +74,7 @@ def input_datetime__(parameter: str, prompt: str, reference_date: datetime.date 
                         return _time
                 else:
                     # [i] default time = Next hour
-                    return (datetime.now() + timedelta(hours=1)).time()
+                    return datetime.time((datetime.strptime((datetime.now() + timedelta(hours=1)).strftime("%H:%M:%S"), "%H:%M:%S")))
             except ValueError:
                 print("Wrong input! Enter time correctly again.")
                 continue
@@ -89,12 +89,12 @@ def input_reminder__():
         __0 = input_validation__("['>>' Skip] Want to create more reminders? ", [">>", "Y", "y"], default="Y")
         if __0 == ">>":
             break
-        print("How will we remind you to '{}' ? It may be before,\n"
+        print("How will we remind you to '{}'? It may be before,\n"
               "  [1]  5 mins;  [2]  10 mins;  [3]  15 mins;  [4] 30 mins;  [5] 45 mins\n"
               "  [6]  1 hour;  [7]  3 hours;  [8]  6 hours;  [9] 12 hours\n"
               "  [10] 1 day;   [11] 3 days;   [12] 5 days\n"
               "  [13] 1 week;  [14] 1 month;  [15] 1 year".format(user_event_title))
-        __selection = input_validation__("['>' Custom] Set reminder for = ", [i for i in range(1, 16)], default=6)
+        __selection = input_validation__("['>' Custom] Set reminder for = ", [">"] + [i for i in range(1, 16)], default=6)
         if __selection == ">":
             _w, _d, _h, _m, _s = [0] * 5
             while 1:
