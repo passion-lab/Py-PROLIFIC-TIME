@@ -142,14 +142,31 @@ def remind_(data: int):
     pass
 
 
+# [i] Provide a list of details of the main events
 def data_type_(data: int):
+    """
+    Accepts a numerical argument from 1 to 4 and return a tuple of associated event details as in main options.
+
+    :param data: Numerical data (viz., 1-4) have to provide
+    :return: A tuple of (event, event-name, event-database-filename)
+    """
+
     for index, option in enumerate(options):
         if data == index + 1:
             # [i] List of main event variables, event names (singular), event database file names
             return globals()[option], option[:-1], option[:-1] + ".data"
 
 
+# [i] Write and retrieve event data from databases
 def data_update_(method: str = 'PUSH'):
+    """
+    Receives an optional argument (PULL, default is PUSH) to fetch the existing event database
+    for addition, updation, deletion or simply pulling of the data.
+
+    :param method: PULL, or PUSH (default)
+    :return: Fetch or Update the database with the realtime data
+    """
+
     if method == 'PUSH':
         for index, option in enumerate(options):
             data = data_type_(index + 1)

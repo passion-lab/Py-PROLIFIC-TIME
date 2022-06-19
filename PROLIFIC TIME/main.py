@@ -26,13 +26,15 @@ countdowns, reminders, tasks, todos = [{
 
 
 # independent program functions
+
+# [i] Input date, time with validation and error handling
 def input_datetime__(parameter: str, prompt: str, reference_date: datetime.date = None):
     """
 
-    :param parameter: What to receive? 'DATE' or 'TIME
+    :param parameter: What to receive? 'DATE' or 'TIME'
     :param prompt: Prompt message string for the user
     :param reference_date: A date is required to troubleshoot the time
-    :return: Date or Time in datetime format
+    :return: Date or Time in datetime() format
     """
 
     if parameter == 'DATE':
@@ -40,6 +42,7 @@ def input_datetime__(parameter: str, prompt: str, reference_date: datetime.date 
             try:
                 _date = input(prompt)
                 if _date:
+                    # [?] ...
                     if _date == "...":
                         return None
                     else:
@@ -61,9 +64,8 @@ def input_datetime__(parameter: str, prompt: str, reference_date: datetime.date 
             try:
                 _time = input(prompt)
                 if _time:
-                    # _time = datetime.time(datetime.strptime(_time, "%H:%M:%S"))
+                    # [=] _time = datetime.time(datetime.strptime(_time, "%H:%M:%S"))
                     _time = datetime.strptime(_time, "%H:%M:%S").time()
-                    # _time = datetime.time(datetime.strptime(_time, "%H:%M:%S"))
                     if reference_date is not None:
                         # [i] Taking time only if it is after the current or a reference time
                         if reference_date == datetime.now().date() and _time <= datetime.now().time():
@@ -83,6 +85,7 @@ def input_datetime__(parameter: str, prompt: str, reference_date: datetime.date 
         raise ValueError("input_datetime__() function supports only 'DATE' or 'TIME' as the primary argument.")
 
 
+# [i] Input reminder frequency
 def input_reminder__():
     _reminds_at = []
     while True:
@@ -95,6 +98,7 @@ def input_reminder__():
               "  [10] 1 day;   [11] 3 days;   [12] 5 days\n"
               "  [13] 1 week;  [14] 1 month;  [15] 1 year".format(user_event_title))
         __selection = input_validation__("['>' Custom] Set reminder for = ", [">"] + [i for i in range(1, 16)], default=6)
+        # [i] Custom notification time
         if __selection == ">":
             _w, _d, _h, _m, _s = [0] * 5
             while 1:
@@ -139,6 +143,7 @@ def input_reminder__():
     return _reminds_at if len(_reminds_at) >= 1 else None
 
 
+# [i] Input notification interval
 def input_recurrence__():
     print(f"Event execution modes:\n  [1] One-time only\n  [2] Recurrently")
     __0 = input_validation__(f"[Default one-time] How frequently would we run your {data_type_(user_event)[1]}? ",
@@ -146,11 +151,13 @@ def input_recurrence__():
     if __0 == 2:
         print("Event recursion frequency:\n  [1] Daily\n  [2] Weekly\n  [3] Monthly\n  [4] Yearly")
         __1 = input_validation__("We repeat the event = ", [1, 2, 3, 4])
-
+        # [+] to be functional...
+        return __1
     else:
         return False
 
 
+# [i] Input validation
 def input_validation__(message: str, valid: list = None, default=None, _any: bool = False):
     """
 
@@ -180,9 +187,12 @@ def input_validation__(message: str, valid: list = None, default=None, _any: boo
                 print("Invalid input. Please try again.")
 
 
+# [x] ___
 def input_user():
     pass
 
+
+# [*] Main runtime program ---------------------------------------------------------------------------------------- #
 
 if __name__ == '__main__':
 

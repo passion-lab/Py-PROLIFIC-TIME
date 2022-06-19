@@ -12,11 +12,12 @@ from threading import Thread
 data_update_(method='PULL')
 
 # [i] Creating an empty dict and updating with the active entries from 4 events
-# viz., countdown, reminder, task and todo
+# viz., {0: [event_1, event_2...], 1: [], 2: [], 3: []} # where, 0123 - as in event options in main.py
 active_event = {index: [] for index, _ in enumerate(options)}
 
 # [i] Creating an empty dict and updating with the running threads of entries
 active_entry = {index: [] for index, _ in enumerate(options)}
+
 
 
 def prt():
@@ -24,15 +25,18 @@ def prt():
     count = 0
     while 1:
         for index, _ in enumerate(options):
-            print(count, f":--- [Active Event]_{datetime.now().time()}")
-            for entry in active_event[index]:
-                print(" >", entry['title'])
-            print()
+            if active_event[index]:
+                print(count, f":--- [Active Event]_{datetime.now().time()}")
+                for entry in active_event[index]:
+                    if entry:
+                        print(" >", entry['title'])
+                print()
 
-            print(count, f":--- [Active Entry]_{datetime.now().time()}")
-            for entry in active_entry[index]:
-                print(" >", entry['title'])
-            print()
+            if active_entry[index]:
+                print(count, f":--- [Active Entry]_{datetime.now().time()}")
+                for entry in active_entry[index]:
+                    print(" >", entry['title'])
+                print()
 
         count += 5
         sleep(5)
@@ -65,6 +69,7 @@ def event_engine():
 
                 for entry in active_event[index]:
                     if entry not in active_entry[index]:
+                        # [+] Have to improve here...
                         Thread(target=core_engine, args=(entry, index, )).start()
                         active_entry[index].append(entry)
                         print(f"Starting thread '{entry['title']}' {datetime.now().time()}...")
@@ -117,8 +122,13 @@ def notify_desktop(title: str = "Title", message: str = "Here the brief message 
     )
 
 
-Thread(target=prt).start()
-Thread(target=event_engine, daemon=True).start()
+t1 = Thread(target=prt)
+t0 = Thread(target=event_engine, daemon=True)
 
-# print(active_entry)
+t1.start()
+t0.start()
+
+t0.join()
+
+print("Noting active events.")
 
